@@ -1,8 +1,8 @@
 // src/components/LoginModal.js
 import React, { useState, useEffect } from 'react';
-import { auth, googleProvider, db } from '../firebaseConfig';
+import { auth, googleProvider } from '../firebaseConfig';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { crearUsuario } from "../services/firestoreService"; // Importa la función crearUsuario
 import M from 'materialize-css';
 import './LoginModal.css';
 
@@ -45,6 +45,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      console.log("Google login successful:", result.user); // Debug
       onLogin(result.user);
       resetFields();
       onClose();
@@ -61,6 +62,8 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     const formattedEmail = email.trim().toLowerCase();
     const formattedPassword = password.trim();
 
+    console.log("Attempting to sign in with:", formattedEmail); // Debug
+
     if (formattedEmail.length > 40) {
       setError("El email no debe exceder los 40 caracteres.");
       return;
@@ -68,12 +71,13 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
     try {
       const result = await signInWithEmailAndPassword(auth, formattedEmail, formattedPassword);
+      console.log("Login successful:", result.user); // Debug
       onLogin(result.user);
       resetFields();
       onClose();
     } catch (error) {
       setError("Error al iniciar sesión. Verifica tus credenciales.");
-      console.error("Error en el inicio de sesión:", error);
+      console.error("Error en el inicio de sesión:", error); // Debug
     }
   };
 
@@ -98,18 +102,24 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, formattedEmail, formattedPassword);
       const user = userCredential.user;
 
-      await setDoc(doc(db, "users", user.uid), {
-        firstName,
-        lastName,
-        documentType,
-        documentNumber,
-        gender,
-        phoneNumber,
-        role: "user",
-        birthdate,
-        email: formattedEmail,
-      });
+      // Crear el objeto de datos del usuario
+      const userData = {
+        nombres: firstName,
+        apellidos: lastName,
+        tipoDocumento: documentType,
+        numeroDocumento: documentNumber,
+        genero: gender,
+        correo: formattedEmail,
+        telefono: phoneNumber,
+        rol: "user",
+        fechaNacimiento: birthdate,
+        fotoURL: "", // Puedes agregar un campo para la URL de la foto si es necesario
+      };
 
+      // Guardar en Firestore usando la función crearUsuario de firestoreService
+      await crearUsuario(user.uid, userData);
+
+      console.log("Registro exitoso:", user); // Debug
       onLogin(user);
       resetFields();
       onClose();
