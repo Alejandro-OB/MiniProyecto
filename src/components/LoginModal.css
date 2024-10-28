@@ -22,3 +22,13 @@
 .full-width {
   width: 100%;
 }
+
+/* Evita que las etiquetas se solapen con el contenido del select */
+.input-field select {
+  display: block !important;
+}
+.input-field label {
+  top: -10px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}

@@ -1,6 +1,8 @@
+// src/components/LoginModal.js
 import React, { useState, useEffect } from 'react';
-import { auth, googleProvider } from '../firebaseConfig';
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider, db } from '../firebaseConfig';
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import M from 'materialize-css';
 import './LoginModal.css';
 
@@ -8,61 +10,214 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+
+  // Campos adicionales para el registro
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [documentType, setDocumentType] = useState('');
+  const [documentNumber, setDocumentNumber] = useState('');
+  const [gender, setGender] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [birthdate, setBirthdate] = useState('');
 
   useEffect(() => {
     M.AutoInit();
+    const elems = document.querySelectorAll('select');
+    M.FormSelect.init(elems);
   }, []);
+
+  const resetFields = () => {
+    setEmail('');
+    setPassword('');
+    setFirstName('');
+    setLastName('');
+    setDocumentType('');
+    setDocumentNumber('');
+    setGender('');
+    setPhoneNumber('');
+    setBirthdate('');
+    setError('');
+  };
 
   if (!isOpen) return null;
 
-  // Función para autenticarse con Google
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      onLogin(result.user); // Aquí puedes pasar los datos de usuario al padre
-      onClose(); // Cierra el modal al iniciar sesión correctamente
+      onLogin(result.user);
+      resetFields();
+      onClose();
     } catch (error) {
       setError("Error al iniciar sesión con Google.");
+      console.error("Error en Google Login:", error);
     }
   };
 
-  // LoginModal.js
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Limpiar errores previos
+    setError('');
 
-    // Validar longitud del login
-    if (email.length > 40) {
-        setError("El login debe tener un máximo de 40 caracteres.");
-        return;
-    }
+    const formattedEmail = email.trim().toLowerCase();
+    const formattedPassword = password.trim();
 
-    // Convertir login a minúsculas para consistencia en la validación
-    const formattedEmail = email.toLowerCase();
-
-    // Validación de longitud de la contraseña
-    if (password.length > 250) {
-        setError("La contraseña no puede superar los 250 caracteres.");
-        return;
+    if (formattedEmail.length > 40) {
+      setError("El email no debe exceder los 40 caracteres.");
+      return;
     }
 
     try {
-        const result = await signInWithEmailAndPassword(auth, formattedEmail, password);
-        onLogin(result.user);
-        onClose();
+      const result = await signInWithEmailAndPassword(auth, formattedEmail, formattedPassword);
+      onLogin(result.user);
+      resetFields();
+      onClose();
     } catch (error) {
-        setError("Error al iniciar sesión. Verifica tus credenciales.");
+      setError("Error al iniciar sesión. Verifica tus credenciales.");
+      console.error("Error en el inicio de sesión:", error);
     }
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const formattedEmail = email.trim().toLowerCase();
+    const formattedPassword = password.trim();
+
+    // Validaciones básicas
+    if (formattedEmail.length > 40 || formattedPassword.length < 6) {
+      setError("El email debe tener menos de 40 caracteres y la contraseña al menos 6 caracteres.");
+      return;
+    }
+
+    if (!birthdate || !documentNumber || !phoneNumber) {
+      setError("Por favor, completa todos los campos.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, formattedEmail, formattedPassword);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        firstName,
+        lastName,
+        documentType,
+        documentNumber,
+        gender,
+        phoneNumber,
+        role: "user",
+        birthdate,
+        email: formattedEmail,
+      });
+
+      onLogin(user);
+      resetFields();
+      onClose();
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        setError("El correo electrónico ya está en uso. Por favor, inicia sesión o usa otro correo.");
+      } else if (error.code === 'auth/invalid-email') {
+        setError("El formato del correo electrónico no es válido.");
+      } else if (error.code === 'auth/weak-password') {
+        setError("La contraseña es demasiado débil. Debe tener al menos 6 caracteres.");
+      } else {
+        setError("Error al registrar el usuario. Verifica tus datos.");
+      }
+      console.error("Error en el registro:", error);
+    }
+  };
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content card">
-        <h4 className="center-align">Iniciar Sesión</h4>
+      <div className="modal-content card" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+        <h4 className="center-align">{isRegisterMode ? "Registrarse" : "Iniciar Sesión"}</h4>
 
-        {/* Formulario de inicio de sesión con correo y contraseña */}
-        <form onSubmit={handleEmailLogin}>
+        <form onSubmit={isRegisterMode ? handleRegister : handleEmailLogin}>
+          {isRegisterMode && (
+            <>
+              <div className="input-field">
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+                <label>Nombre</label>
+              </div>
+              <div className="input-field">
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+                <label>Apellido</label>
+              </div>
+              
+              {/* Tipo de Documento como Lista Desplegable */}
+              <div className="input-field">
+                <select
+                  value={documentType}
+                  onChange={(e) => setDocumentType(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Seleccione el tipo de documento</option>
+                  <option value="CC">Cédula de Ciudadanía</option>
+                  <option value="TI">Tarjeta de Identidad</option>
+                  <option value="CE">Cédula de Extranjería</option>
+                  <option value="PA">Pasaporte</option>
+                </select>
+                <label>Tipo de Documento</label>
+              </div>
+
+              <div className="input-field">
+                <input
+                  type="text"
+                  value={documentNumber}
+                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  required
+                />
+                <label>Número de Documento</label>
+              </div>
+
+              {/* Género como Lista Desplegable */}
+              <div className="input-field">
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Seleccione el género</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+                <label>Género</label>
+              </div>
+
+              <div className="input-field">
+                <input
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                />
+                <label>Teléfono Móvil</label>
+              </div>
+              
+              <div className="input-field">
+                <input
+                  type="date"
+                  value={birthdate}
+                  onChange={(e) => setBirthdate(e.target.value)}
+                  required
+                />
+                <label>Fecha de Nacimiento</label>
+              </div>
+            </>
+          )}
+          
           <div className="input-field">
             <input
               type="email"
@@ -88,20 +243,39 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
           </div>
 
           <button type="submit" className="btn waves-effect waves-light full-width">
-            Iniciar sesión
+            {isRegisterMode ? "Registrarse" : "Iniciar sesión"}
           </button>
         </form>
 
-        {/* Botón de Inicio de Sesión con Google */}
-        <button onClick={handleGoogleLogin} className="btn waves-effect waves-light full-width" style={{ marginTop: '10px' }}>
-          Iniciar sesión con Google
+        <button
+          onClick={handleGoogleLogin}
+          className="btn waves-effect waves-light full-width"
+          style={{ marginTop: '10px' }}
+        >
+          {isRegisterMode ? "Registrarse con Google" : "Iniciar sesión con Google"}
         </button>
 
-        {/* Mensaje de Error */}
         {error && <p className="error red-text">{error}</p>}
 
-        {/* Botón de Cerrar */}
-        <button className="btn-flat red-text" onClick={onClose} style={{ marginTop: '10px' }}>
+        <button
+          className="btn-flat teal-text"
+          onClick={() => {
+            setIsRegisterMode(!isRegisterMode);
+            resetFields();
+          }}
+          style={{ marginTop: '10px' }}
+        >
+          {isRegisterMode ? "¿Ya tienes una cuenta? Inicia Sesión" : "¿No tienes una cuenta? Regístrate"}
+        </button>
+
+        <button
+          className="btn-flat red-text"
+          onClick={() => {
+            onClose();
+            resetFields();
+          }}
+          style={{ marginTop: '10px' }}
+        >
           Cerrar
         </button>
       </div>
