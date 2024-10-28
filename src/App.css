@@ -69,7 +69,37 @@
     background-color: #388e3c;
   }
 
- 
+ /* Estilos para los botones en la tabla */
+.table-buttons {
+  display: flex;
+  gap: 10px; /* Espacio entre los botones */
+}
 
+.table-button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-  
+/* Botón de Editar */
+.table-button.edit {
+  background-color: #26a69a; /* Color teal */
+  color: white;
+}
+
+.table-button.edit:hover {
+  background-color: #2bbbad; /* Color teal más claro al hacer hover */
+}
+
+/* Botón de Eliminar */
+.table-button.delete {
+  background-color: #ff5252; /* Color rojo */
+  color: white;
+}
+
+.table-button.delete:hover {
+  background-color: #ff1744; /* Color rojo más intenso al hacer hover */
+}
