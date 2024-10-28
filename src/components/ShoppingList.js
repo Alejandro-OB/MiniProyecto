@@ -1,6 +1,8 @@
 // src/components/ShoppingList.js
 import React, { useState } from 'react';
 import EditProductModal from './EditProductModal';
+import './ShoppingList.css';
+
 
 const ShoppingList = ({ products, onEditProduct, onDeleteProduct }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
