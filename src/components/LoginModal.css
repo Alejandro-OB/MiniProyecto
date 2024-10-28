@@ -32,3 +32,15 @@
   font-size: 0.9rem;
   transition: all 0.2s;
 }
+
+.register-close-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+
+.close-button {
+  margin-top: 30px; /* Aumenta el valor según necesites más espacio */
+}

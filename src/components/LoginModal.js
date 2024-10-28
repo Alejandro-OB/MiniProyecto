@@ -84,7 +84,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     const formattedEmail = email.trim().toLowerCase();
     const formattedPassword = password.trim();
 
-    // Validaciones básicas
     if (formattedEmail.length > 40 || formattedPassword.length < 6) {
       setError("El email debe tener menos de 40 caracteres y la contraseña al menos 6 caracteres.");
       return;
@@ -155,7 +154,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
                 <label>Apellido</label>
               </div>
               
-              {/* Tipo de Documento como Lista Desplegable */}
               <div className="input-field">
                 <select
                   value={documentType}
@@ -181,7 +179,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
                 <label>Número de Documento</label>
               </div>
 
-              {/* Género como Lista Desplegable */}
               <div className="input-field">
                 <select
                   value={gender}
@@ -257,27 +254,28 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
 
         {error && <p className="error red-text">{error}</p>}
 
-        <button
-          className="btn-flat teal-text"
-          onClick={() => {
-            setIsRegisterMode(!isRegisterMode);
-            resetFields();
-          }}
-          style={{ marginTop: '10px' }}
-        >
-          {isRegisterMode ? "¿Ya tienes una cuenta? Inicia Sesión" : "¿No tienes una cuenta? Regístrate"}
-        </button>
+        <div className="register-close-container">
+          <button
+            className="btn-flat teal-text"
+            onClick={() => {
+              setIsRegisterMode(!isRegisterMode);
+              resetFields();
+            }}
+            style={{ marginTop: '10px' }}
+          >
+            {isRegisterMode ? "¿Ya tienes una cuenta? Inicia Sesión" : "¿No tienes una cuenta? Regístrate"}
+          </button>
 
-        <button
-          className="btn-flat red-text"
-          onClick={() => {
-            onClose();
-            resetFields();
-          }}
-          style={{ marginTop: '10px' }}
-        >
-          Cerrar
-        </button>
+          <button
+            className="btn-flat red-text close-button"
+            onClick={() => {
+              onClose();
+              resetFields();
+            }}
+          >
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );
