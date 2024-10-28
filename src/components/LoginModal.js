@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth, googleProvider } from './firebaseConfig';
+import { auth, googleProvider } from '../firebaseConfig';
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import M from 'materialize-css';
 import './LoginModal.css';

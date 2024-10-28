@@ -1,7 +1,7 @@
 // src/components/AddProductModal.js
 import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db } from '../firebaseConfig';
 
 const AddProductModal = ({ isOpen, onClose, onAdd }) => {
   const [nombre, setNombre] = useState('');
