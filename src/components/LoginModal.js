@@ -172,9 +172,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
                 >
                   <option value="" disabled>Seleccione el tipo de documento</option>
                   <option value="CC">Cédula de Ciudadanía</option>
-                  <option value="TI">Tarjeta de Identidad</option>
-                  <option value="CE">Cédula de Extranjería</option>
-                  <option value="PA">Pasaporte</option>
+                  <option value="CO">Código</option>
                 </select>
                 <label>Tipo de Documento</label>
               </div>

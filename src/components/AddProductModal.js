@@ -30,19 +30,17 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
     }
 
     try {
-      await addDoc(collection(db, 'productos'), {
+      const docRef = await addDoc(collection(db, 'productos'), {
         nombre,
         sitio,
       });
-      console.log('Producto agregado exitosamente');
-      onAdd(); // Llama a la función onAdd para actualizar la lista de productos en la interfaz principal
+      const newProduct = { id: docRef.id, nombre, sitio }; // Crea el objeto del nuevo producto
 
-      // Muestra el mensaje de confirmación y limpia la entrada
+      onAdd(newProduct); // Pasa el nuevo producto a Home.js
       setMensajeConfirmacion("Producto agregado exitosamente.");
       setNombre('');
       setSitio('');
-
-      // Oculta el mensaje después de 3 segundos
+      
       setTimeout(() => setMensajeConfirmacion(''), 3000);
     } catch (error) {
       console.error('Error al agregar producto:', error);
@@ -56,12 +54,9 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <h4 className="center-align">Nuevo producto</h4>
-
-        {/* Muestra el mensaje de confirmación si existe */}
         {mensajeConfirmacion && (
           <p style={{ color: 'green', fontSize: '14px' }}>{mensajeConfirmacion}</p>
         )}
-
         <div className="input-field">
           <input 
             type="text" 
@@ -94,14 +89,13 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
           <button className="btn-cancel" onClick={onClose}>Cancelar</button>
         </div>
 
-        {/* Modal para agregar un nuevo sitio */}
         {isAddSiteModalOpen && (
           <AddSiteModal
             isOpen={isAddSiteModalOpen}
             onClose={() => setAddSiteModalOpen(false)}
             onAdd={(newSite) => {
-              setSitio(newSite.Nombre); // Selecciona automáticamente el nuevo sitio
-              setSitios([...sitios, newSite]); // Actualiza la lista de sitios
+              setSitio(newSite.Nombre); 
+              setSitios([...sitios, newSite]);
             }}
           />
         )}

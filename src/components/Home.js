@@ -14,7 +14,7 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
   }, []);
 
   const handleAddProduct = (newProduct) => {
-    setProducts([...products, { ...newProduct, id: Date.now() }]);
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
   };
 
   const handleEditProduct = async (updatedProduct) => {
