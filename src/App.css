@@ -51,23 +51,32 @@
     background-color: #f1f1f1;
   }
   
-  /* Botón de añadir producto */
-  .add-product-btn {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    background-color: #4caf50;
-    color: white;
-    font-size: 1rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .add-product-btn:hover {
-    background-color: #388e3c;
-  }
+  /* Botón de "Añadir Producto" */
+.btn-add-product {
+  background-color: #26a69a; /* Color verde */
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Efecto hover para el botón */
+.btn-add-product:hover {
+  background-color: #2bbbad; /* Verde más claro al hacer hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Estado activo para evitar deshabilitación */
+.btn-add-product:disabled {
+  opacity: 1; /* Asegura que no se vea deshabilitado */
+  background-color: #26a69a; /* Color verde */
+  cursor: pointer;
+}
+
 
  /* Estilos para los botones en la tabla */
 .table-buttons {
