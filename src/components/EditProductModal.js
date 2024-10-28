@@ -1,24 +1,20 @@
-// src/components/EditProductModal.js
 import React, { useState, useEffect } from 'react';
-import M from 'materialize-css';
-import './ModalStyles.css';  // Importa el CSS aquí
 
-const EditProductModal = ({ product, onClose, onSave }) => {
-  const [name, setName] = useState(product.name || '');
-  const [site, setSite] = useState(product.site || '');
+const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
+  const [nombre, setNombre] = useState(product.nombre || '');
+  const [sitio, setSitio] = useState(product.sitio || '');
 
   useEffect(() => {
-    M.AutoInit();
-    M.updateTextFields();  // Asegura que los labels se actualicen al abrir el modal
-  }, []);
+    setNombre(product.nombre || '');
+    setSitio(product.sitio || '');
+  }, [product]);
 
   const handleSave = () => {
-    if (name.trim() === '' || site.trim() === '') {
-      alert("Ambos campos son obligatorios.");
-      return;
-    }
-    onSave({ ...product, name, site });
+    const updatedProduct = { ...product, nombre, sitio };
+    onSave(updatedProduct);
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay">
@@ -26,20 +22,18 @@ const EditProductModal = ({ product, onClose, onSave }) => {
         <h4>Editar Producto</h4>
         <div className="input-field">
           <input
-            id="productName"
             type="text"
             placeholder="Nombre del producto"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
           />
         </div>
         <div className="input-field">
           <input
-            id="productSite"
             type="text"
             placeholder="Sitio"
-            value={site}
-            onChange={(e) => setSite(e.target.value)}
+            value={sitio}
+            onChange={(e) => setSitio(e.target.value)}
           />
         </div>
         <div className="modal-buttons">
@@ -52,4 +46,3 @@ const EditProductModal = ({ product, onClose, onSave }) => {
 };
 
 export default EditProductModal;
-

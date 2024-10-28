@@ -1,14 +1,27 @@
-// src/components/AddProductModal.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import AddSiteModal from './AddSiteModal';  // Importa el nuevo modal
+import AddSiteModal from './AddSiteModal';
+import { obtenerSitios } from '../services/firestoreService';
 import './ModalStyles.css';
 
 const AddProductModal = ({ isOpen, onClose, onAdd }) => {
   const [nombre, setNombre] = useState('');
   const [sitio, setSitio] = useState('');
-  const [isAddSiteModalOpen, setAddSiteModalOpen] = useState(false); // Estado para el segundo modal
+  const [sitios, setSitios] = useState([]);
+  const [isAddSiteModalOpen, setAddSiteModalOpen] = useState(false);
+  const [mensajeConfirmacion, setMensajeConfirmacion] = useState('');
+
+  useEffect(() => {
+    const cargarSitios = async () => {
+      const sitiosObtenidos = await obtenerSitios();
+      setSitios(sitiosObtenidos);
+    };
+
+    if (isOpen) {
+      cargarSitios();
+    }
+  }, [isOpen]);
 
   const handleAddProduct = async () => {
     if (!nombre || !sitio) {
@@ -22,10 +35,18 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
         sitio,
       });
       console.log('Producto agregado exitosamente');
-      onAdd();
-      onClose();
+      onAdd(); // Llama a la función onAdd para actualizar la lista de productos en la interfaz principal
+
+      // Muestra el mensaje de confirmación y limpia la entrada
+      setMensajeConfirmacion("Producto agregado exitosamente.");
+      setNombre('');
+      setSitio('');
+
+      // Oculta el mensaje después de 3 segundos
+      setTimeout(() => setMensajeConfirmacion(''), 3000);
     } catch (error) {
       console.error('Error al agregar producto:', error);
+      alert("Error al agregar producto. Inténtalo de nuevo.");
     }
   };
 
@@ -35,6 +56,12 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <h4 className="center-align">Nuevo producto</h4>
+
+        {/* Muestra el mensaje de confirmación si existe */}
+        {mensajeConfirmacion && (
+          <p style={{ color: 'green', fontSize: '14px' }}>{mensajeConfirmacion}</p>
+        )}
+
         <div className="input-field">
           <input 
             type="text" 
@@ -49,12 +76,15 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
             onChange={(e) => setSitio(e.target.value)}
           >
             <option value="" disabled>Seleccionar sitio...</option>
-            <option value="Sitio 1">Sitio 1</option>
-            <option value="Sitio 2">Sitio 2</option>
+            {sitios.map((sitio) => (
+              <option key={sitio.id} value={sitio.Nombre}>
+                {sitio.Nombre}
+              </option>
+            ))}
           </select>
           <button 
             className="btn-add-site"
-            onClick={() => setAddSiteModalOpen(true)}  // Abre el modal de agregar sitio
+            onClick={() => setAddSiteModalOpen(true)}
           >
             +
           </button>
@@ -69,7 +99,10 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
           <AddSiteModal
             isOpen={isAddSiteModalOpen}
             onClose={() => setAddSiteModalOpen(false)}
-            onAdd={(newSite) => setSitio(newSite)}  // Asigna el sitio seleccionado
+            onAdd={(newSite) => {
+              setSitio(newSite.Nombre); // Selecciona automáticamente el nuevo sitio
+              setSitios([...sitios, newSite]); // Actualiza la lista de sitios
+            }}
           />
         )}
       </div>

@@ -1,46 +1,40 @@
-// src/components/Home.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ShoppingList from './ShoppingList';
-import AddProductModal from './AddProductModal';
-import EditProductModal from './EditProductModal';
+import { obtenerProductos, eliminarProducto, actualizarProducto } from '../services/firestoreService';
 
 const Home = ({ isAuthenticated, onStartLogin }) => {
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Tomate', site: 'Placita campesina' },
-    { id: 2, name: 'Jabón', site: 'D1' },
-    { id: 3, name: 'Arroz', site: 'ARA' },
-  ]);
+  const [products, setProducts] = useState([]);
 
-  const [isAddModalOpen, setAddModalOpen] = useState(false);
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  useEffect(() => {
+    const cargarProductos = async () => {
+      const productosObtenidos = await obtenerProductos();
+      setProducts(productosObtenidos);
+    };
+    cargarProductos();
+  }, []);
 
-  // Función para añadir un producto
   const handleAddProduct = (newProduct) => {
     setProducts([...products, { ...newProduct, id: Date.now() }]);
-    setAddModalOpen(false);
   };
 
-  // Función para editar un producto
-  const handleEditProduct = (updatedProduct) => {
+  const handleEditProduct = async (updatedProduct) => {
+    await actualizarProducto(updatedProduct.id, { nombre: updatedProduct.nombre, sitio: updatedProduct.sitio });
+
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
         product.id === updatedProduct.id ? updatedProduct : product
       )
     );
-    setEditModalOpen(false);
   };
 
-  // Función para eliminar un producto
-  const handleDeleteProduct = (productId) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product.id !== productId)
-      );
-    }
+  const handleDeleteProduct = async (productId) => {
+    await eliminarProducto(productId);
+
+    setProducts((prevProducts) =>
+      prevProducts.filter((product) => product.id !== productId)
+    );
   };
 
-  // Muestra un mensaje de inicio de sesión si el usuario no está autenticado
   if (!isAuthenticated) {
     return (
       <div className="center-align">
@@ -59,40 +53,12 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
   return (
     <div className="center-align">
       <h3>Lista de Compras</h3>
-      <button 
-        className="btn waves-effect waves-light teal"
-        onClick={() => setAddModalOpen(true)} // Abre el modal al hacer clic
-      >
-        + AÑADIR PRODUCTO
-      </button>
-
-      {/* Componente de lista de compras */}
       <ShoppingList
         products={products}
-        onEdit={(product) => {
-          setSelectedProduct(product);
-          setEditModalOpen(true);
-        }}
-        onDelete={handleDeleteProduct}
+        onAddProduct={handleAddProduct}
+        onEditProduct={handleEditProduct}
+        onDeleteProduct={handleDeleteProduct}
       />
-
-      {/* Modal para agregar producto */}
-      {isAddModalOpen && (
-        <AddProductModal
-          isOpen={isAddModalOpen} // Asegura que el modal recibe la prop `isOpen`
-          onClose={() => setAddModalOpen(false)} // Cierra el modal
-          onAdd={handleAddProduct} // Función para añadir producto
-        />
-      )}
-
-      {/* Modal para editar producto */}
-      {isEditModalOpen && selectedProduct && (
-        <EditProductModal
-          product={selectedProduct}
-          onClose={() => setEditModalOpen(false)}
-          onSave={handleEditProduct}
-        />
-      )}
     </div>
   );
 };
