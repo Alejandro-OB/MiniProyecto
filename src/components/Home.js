@@ -38,7 +38,7 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
   if (!isAuthenticated) {
     return (
       <div className="center-align">
-        <h3>Bienvenido a la Lista de Compras</h3>
+        <h3>Bienvenido a la Lista de Compras Maria</h3>
         <p>Para administrar tu lista de compras, debes iniciar sesión.</p>
         <button
           className="btn waves-effect waves-light teal"
