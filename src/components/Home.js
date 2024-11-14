@@ -10,6 +10,8 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
   const [selectedList, setSelectedList] = useState(null);
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+
 
 
   useEffect(() => {
@@ -39,6 +41,28 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
     const nuevaLista = await crearLista(nombreLista);
     setLists((prevLists) => [nuevaLista, ...prevLists]);
     setSelectedList(nuevaLista);
+  };
+
+  const handleDuplicateList = () => {
+    setIsDuplicateModalOpen(true);
+  };
+
+  const handleSaveDuplicateList = async (nombreLista) => {
+    // Crear nueva lista
+    const nuevaLista = await crearLista(nombreLista);
+
+    // Copiar productos de la lista seleccionada a la nueva lista
+    const productosDuplicados = products.map((product) => ({
+      ...product,
+      idLista: nuevaLista.id,
+    }));
+
+    for (const product of productosDuplicados) {
+      await agregarProducto(product);
+    }
+    setLists((prevLists) => [nuevaLista, ...prevLists]);
+    setSelectedList(nuevaLista);
+    setIsDuplicateModalOpen(false);
   };
 
   const handleSelectList = (list) => {
@@ -109,6 +133,11 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
         <h3>LISTA DE COMPRAS</h3>
         <button className="btn" onClick={handleCreateList}>Crear Nueva Lista</button>
 
+        {/* Botón para duplicar la lista seleccionada */}
+        {selectedList && (
+          <button className="btn" onClick={handleDuplicateList}>Duplicar Lista Actual</button>
+        )}
+
         <Slider {...settings} className="slider">
           {lists.map((list) => (
             <div key={list.id}>
@@ -143,7 +172,13 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveList}
-      />      
+      />     
+      {/* Modal para duplicar lista */}
+      <NewListModal
+        isOpen={isDuplicateModalOpen}
+        onClose={() => setIsDuplicateModalOpen(false)}
+        onSave={handleSaveDuplicateList}
+      />  
     </div>
   );
 };
