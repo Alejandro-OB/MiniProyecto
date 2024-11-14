@@ -95,6 +95,8 @@
 }
 
 .shopping-list input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
+  opacity: 10;
+  pointer-events: all;
 }
