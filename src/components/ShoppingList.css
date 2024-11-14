@@ -1,4 +1,4 @@
-/* Estilo de la tabla específica para ShoppingList */
+
 .shopping-list table {
   width: 100%;
   border-collapse: collapse;
@@ -20,7 +20,7 @@
   background-color: #f1f1f1;
 }
 
-/* Estilos para los botones en la tabla */
+
 .shopping-list .table-buttons {
   display: flex;
   gap: 10px;
@@ -35,44 +35,44 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Estilo específico para el botón Editar */
+
 .shopping-list .table-button.edit {
-  background-color: #26a69a; /* Color teal */
+  background-color: #26a69a; 
   color: white;
 }
 
 .shopping-list .table-button.edit:hover {
-  background-color: #2bbbad; /* Color teal más claro al hacer hover */
+  background-color: #2bbbad; 
 }
 
-/* Estilo específico para el botón Eliminar */
+
 .shopping-list .table-button.delete {
-  background-color: #ff5252; /* Color rojo */
+  background-color: #ff5252; 
   color: white;
 }
 
 .shopping-list .table-button.delete:hover {
-  background-color: #ff1744; /* Color rojo más intenso al hacer hover */
+  background-color: #ff1744; 
 }
 
-/* Estilo específico para el botón Añadir Producto en la parte superior */
+
 .add-product-top-button {
   margin-bottom: 15px;
-  background-color: #26a69a; /* Color teal */
+  background-color: #26a69a; 
   color: white;
-  padding: 10px 20px;
+  padding: 0px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   transition: background-color 0.3s ease;
 }
 
 .add-product-top-button:hover {
-  background-color: #2bbbad; /* Color teal más claro al hacer hover */
+  background-color: #2bbbad; 
 }
 
-/* Centrado para el mensaje de "No hay productos en esta lista" */
+
 .shopping-list .center-align {
   text-align: center;
 }
@@ -80,7 +80,7 @@
 /* Estilo del botón de Crear lista con diseño especial */
 .create-list-button.styled-button {
   padding: 12px 24px;
-  background-color: #ff9800; /* Color naranja */
+  background-color: #ff9800; 
   color: white;
   font-weight: bold;
   border: none;
@@ -91,5 +91,10 @@
 }
 
 .create-list-button.styled-button:hover {
-  background-color: #e68900; /* Color naranja más oscuro */
+  background-color: #e68900; 
+}
+
+.shopping-list input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
 }

@@ -1,13 +1,54 @@
-/* src/App.css */
+@import "~slick-carousel/slick/slick.css";
+@import "~slick-carousel/slick/slick-theme.css";
 
-/* Estilo general de la página */
+
+
 .App {
   font-family: Arial, sans-serif;
   color: #333;
   padding: 20px;
 }
 
-/* Título de la página */
+
+.main-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px; 
+}
+
+
+.left-panel {
+  width: 30%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  border-right: 2px solid #e0e0e0; 
+}
+
+
+.slider {
+  width: 100%;
+}
+
+.slider .slick-slide {
+  display: flex;
+  justify-content: center;
+}
+
+.slick-prev:before, .slick-next:before {
+  color: #00796b; 
+}
+
+
+.right-panel {
+  width: 70%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+
 h3 {
   font-size: 2rem;
   color: #333;
@@ -15,7 +56,7 @@ h3 {
   text-align: center;
 }
 
-/* Botón de inicio de sesión */
+
 .login-btn {
   position: absolute;
   top: 20px;
@@ -32,11 +73,28 @@ h3 {
   background-color: #004d40;
 }
 
-/* Botón de "Añadir Producto" */
-.btn-add-product {
-  background-color: #26a69a; /* Color verde */
+
+.btn {
+  background-color: #26a69a;
   color: white;
-  padding: 10px 20px;
+  padding: 0px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
+}
+.btn:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+.btn-add-product {
+  background-color: #26a69a;
+  color: white;
+  padding: 6px 12px;
   font-size: 16px;
   border: none;
   border-radius: 4px;
@@ -45,15 +103,15 @@ h3 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Efecto hover para el botón */
+
 .btn-add-product:hover {
-  background-color: #2bbbad; /* Verde más claro al hacer hover */
+  background-color: #2bbbad; 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Estado activo para evitar deshabilitación */
+
 .btn-add-product:disabled {
-  opacity: 1; /* Asegura que no se vea deshabilitado */
-  background-color: #26a69a; /* Color verde */
+  opacity: 1; 
+  background-color: #26a69a; 
   cursor: pointer;
 }
