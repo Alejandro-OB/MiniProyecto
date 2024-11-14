@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
+import AddProductModal from './AddProductModal';
+import EditProductModal from './EditProductModal';
 import './ShoppingList.css';
 
 const ShoppingList = ({ products, onAddProduct, onEditProduct, onDeleteProduct, onToggleComplete }) => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isAddModalOpen, setAddModalOpen] = useState(false);
+
+  const handleEditClick = (product) => {
+    setSelectedProduct(product);
+    setEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (productId) => {
+    onDeleteProduct(productId);
+  };
+
+  const handleSaveEdit = (updatedProduct) => {
+    onEditProduct(updatedProduct);
+    setEditModalOpen(false);
+  };
+
   return (
     <div className="shopping-list">
-      <button className="btn-add-product" onClick={() => onAddProduct()}>
+      <button className="btn-add-product" onClick={() => setAddModalOpen(true)}>
         + AÑADIR PRODUCTO
       </button>
       <table>
@@ -23,17 +43,17 @@ const ShoppingList = ({ products, onAddProduct, onEditProduct, onDeleteProduct, 
                 <td>
                   <input
                     type="checkbox"
-                    checked={product.comprado || true}
+                    checked={product.comprado || false}  // Asegura que el checkbox refleje el estado correcto
                     onChange={() => onToggleComplete(product.id, !product.comprado)}
                   />
                 </td>
                 <td>{product.nombre}</td>
                 <td>{product.sitio}</td>
                 <td>
-                  <button className="btn-save" onClick={() => onEditProduct(product)}>
+                  <button className="btn-save" onClick={() => handleEditClick(product)}>
                     Editar
                   </button>
-                  <button className="btn-cancel" onClick={() => onDeleteProduct(product.id)}>
+                  <button className="btn-cancel" onClick={() => handleDeleteClick(product.id)}>
                     Eliminar
                   </button>
                 </td>
@@ -46,6 +66,25 @@ const ShoppingList = ({ products, onAddProduct, onEditProduct, onDeleteProduct, 
           )}
         </tbody>
       </table>
+
+      {/* Modal para agregar producto */}
+      {isAddModalOpen && (
+        <AddProductModal
+          isOpen={isAddModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          onAdd={onAddProduct}
+        />
+      )}
+
+      {/* Modal para editar producto */}
+      {isEditModalOpen && selectedProduct && (
+        <EditProductModal
+          product={selectedProduct}
+          isOpen={isEditModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </div>
   );
 };
