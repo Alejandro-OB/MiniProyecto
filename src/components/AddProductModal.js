@@ -34,9 +34,9 @@ const AddProductModal = ({ isOpen, onClose, onAdd }) => {
         nombre,
         sitio,
       });
-      const newProduct = { id: docRef.id, nombre, sitio }; // Crea el objeto del nuevo producto
+      const newProduct = { id: docRef.id, nombre, sitio };
 
-      onAdd(newProduct); // Pasa el nuevo producto a Home.js
+      onAdd(newProduct); 
       setMensajeConfirmacion("Producto agregado exitosamente.");
       setNombre('');
       setSitio('');

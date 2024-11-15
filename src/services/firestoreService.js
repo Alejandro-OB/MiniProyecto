@@ -1,4 +1,4 @@
-// firestoreService.js
+
 import { db } from "../firebaseConfig";
 import { doc, setDoc, getDocs, addDoc, deleteDoc, updateDoc, collection, query, orderBy, limit, where } from "firebase/firestore";
 
@@ -18,7 +18,7 @@ export const crearListaCompras = async (ultimaLista = null) => {
   try {
     const listaData = { FechaRegistro: new Date() };
     if (ultimaLista) {
-      listaData.productos = ultimaLista.productos; // Copia los productos de la última lista
+      listaData.productos = ultimaLista.productos;
     }
     const docRef = await addDoc(collection(db, "listacompras"), listaData);
     console.log("Lista de compras creada con ID: ", docRef.id);
@@ -183,5 +183,20 @@ export const crearRol = async (nombre) => {
     return docRef.id;
   } catch (e) {
     console.error("Error al crear rol: ", e);
+  }
+};
+
+export const obtenerNumeroDeAdmins = async () => {
+  try {
+    const usuariosRef = collection(db, "usuarios");
+    const q = query(usuariosRef, where("Rol", "==", "admin"));
+    const querySnapshot = await getDocs(q);
+    
+    const numAdmins = querySnapshot.size;
+    console.log("admin: "+numAdmins);
+    return numAdmins;
+  } catch (error) {
+    console.error("Error al obtener el número de administradores:", error);
+    throw error;
   }
 };

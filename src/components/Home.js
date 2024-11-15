@@ -2,26 +2,38 @@ import React, { useState, useEffect } from 'react';
 import ShoppingList from './ShoppingList';
 import Slider from "react-slick";
 import NewListModal from './NewListModal';
-import { obtenerProductos, eliminarProducto, actualizarProducto, agregarProducto } from '../services/firestoreService';
+import { auth } from '../firebaseConfig';
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { obtenerProductos, eliminarProducto, actualizarProducto, agregarProducto, eliminarLista} from '../services/firestoreService';
 import { obtenerListas, crearLista } from '../services/firestoreService';
 
-const Home = ({ isAuthenticated, onStartLogin }) => {
+const Home = ({ onStartLogin }) => {
   const [lists, setLists] = useState([]);
   const [selectedList, setSelectedList] = useState(null);
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false); 
+  const [currentUser, setCurrentUser] = useState(null);
 
 
   useEffect(() => {
-    const cargarListas = async () => {
-      const listasObtenidas = await obtenerListas();
-      const listasOrdenadas = listasObtenidas.sort((a, b) => b.fechaRegistro - a.fechaRegistro);
-      setLists(listasOrdenadas);
-    };
-    cargarListas();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setCurrentUser(user);
+      if (user) {
+        cargarListas();
+      }
+    });
+    return () => unsubscribe();
   }, []);
+
+  const cargarListas = async () => {
+    const listasObtenidas = await obtenerListas();
+    const listasOrdenadas = listasObtenidas.sort((a, b) => b.fechaRegistro - a.fechaRegistro);
+    setLists(listasOrdenadas);
+  };
+
 
   useEffect(() => {
     if (selectedList) {
@@ -48,10 +60,7 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
   };
 
   const handleSaveDuplicateList = async (nombreLista) => {
-    // Crear nueva lista
     const nuevaLista = await crearLista(nombreLista);
-
-    // Copiar productos de la lista seleccionada a la nueva lista
     const productosDuplicados = products.map((product) => ({
       ...product,
       idLista: nuevaLista.id,
@@ -101,20 +110,23 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
     );
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="center-align">
-        <h3>Bienvenido SmartList</h3>
-        <p>Para administrar tu lista de compras, debes iniciar sesión.</p>
-        <button
-          className="btn waves-effect waves-light teal"
-          onClick={onStartLogin}
-        >
-          Iniciar Sesión
-        </button>
-      </div>
-    );
-  }
+  const handleLogout = async () => {
+    await signOut(auth);
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+  };
+
+  const handleDeleteList = async () => {
+    if (selectedList) {
+      for (const product of products) {
+        await eliminarProducto(product.id);
+      }
+      await eliminarLista(selectedList.id);
+      setLists((prevLists) => prevLists.filter((list) => list.id !== selectedList.id));
+      setSelectedList(null);
+      setProducts([]);
+    }
+  };
 
   const settings = {
     dots: true,
@@ -126,54 +138,68 @@ const Home = ({ isAuthenticated, onStartLogin }) => {
     afterChange: (index) => setSelectedList(lists[index])
   };
 
-  return (
+ return (
     <div className="main-container">
-      {/* Panel izquierdo para cambiar de lista y crear nueva lista */}
-      <div className="left-panel">
-        <h3>LISTA DE COMPRAS</h3>
-        <button className="btn" onClick={handleCreateList}>Crear Nueva Lista</button>
+      {!isAuthenticated ? (
+        <div className="center-align">
+          <h3>Bienvenido a SmartList</h3>
+          <p>Para administrar tu lista de compras, debes iniciar sesión.</p>
+          <button
+            className="btn waves-effect waves-light teal"
+            onClick={onStartLogin}
+          >
+            Iniciar Sesión
+          </button>
+        </div>
+      ) : (
+        <>
 
-        {/* Botón para duplicar la lista seleccionada */}
-        {selectedList && (
-          <button className="btn" onClick={handleDuplicateList}>Duplicar Lista Actual</button>
-        )}
+          <div className="left-panel">
+            <h3>LISTA DE COMPRAS</h3>
+            <button className="btn" onClick={handleCreateList}>Crear Nueva Lista</button>
+            {selectedList && (
+              <>
+                <button className="btn" onClick={handleDuplicateList}>Duplicar Lista Actual</button>
+                <button className="btn red" onClick={handleDeleteList}>Eliminar Lista Actual</button>
+              </>
+            )}
+            <Slider {...settings} className="slider">
+              {lists.map((list) => (
+                <div key={list.id}>
+                  <button
+                    className="btn" 
+                    onClick={() => setSelectedList(list)}
+                  >
+                    {list.nombre}
+                  </button>
+                </div>
+              ))}
+            </Slider>
+          </div>
 
-        <Slider {...settings} className="slider">
-          {lists.map((list) => (
-            <div key={list.id}>
-              <button
-                className="btn" 
-                onClick={() => setSelectedList(list)}
-              >
-                {list.nombre}
-              </button>
-            </div>
-          ))}
-        </Slider>
-      </div>
+          <div className="right-panel">
+            {selectedList && (
+              <>
+                <ShoppingList
+                  products={products}
+                  onAddProduct={handleAddProduct}
+                  onEditProduct={handleEditProduct}
+                  onDeleteProduct={handleDeleteProduct}
+                  onToggleComplete={handleToggleComplete}
+                  selectedList={selectedList}
+                />
+              </>
+            )}
+          </div>
+        </>
+      )}
 
-      {/* Panel derecho para mostrar los productos de la lista seleccionada */}
-      <div className="right-panel">
-        {selectedList && (
-          <>
-            <ShoppingList
-              products={products}
-              onAddProduct={handleAddProduct}
-              onEditProduct={handleEditProduct}
-              onDeleteProduct={handleDeleteProduct}
-              onToggleComplete={handleToggleComplete}
-              selectedList={selectedList}
-            />
-          </>
-        )}
-      </div>
-      {/* Modal para crear nueva lista */}
       <NewListModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveList}
       />     
-      {/* Modal para duplicar lista */}
+
       <NewListModal
         isOpen={isDuplicateModalOpen}
         onClose={() => setIsDuplicateModalOpen(false)}

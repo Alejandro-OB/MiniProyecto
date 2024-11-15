@@ -1,8 +1,8 @@
-// src/components/LoginModal.js
+
 import React, { useState, useEffect } from 'react';
 import { auth, googleProvider } from '../firebaseConfig';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { crearUsuario } from "../services/firestoreService"; // Importa la función crearUsuario
+import { crearUsuario, obtenerNumeroDeAdmins } from "../services/firestoreService"; // Importa la función crearUsuario
 import M from 'materialize-css';
 import './LoginModal.css';
 
@@ -11,8 +11,6 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-
-  // Campos adicionales para el registro
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [documentType, setDocumentType] = useState('');
@@ -20,6 +18,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
   const [gender, setGender] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [birthdate, setBirthdate] = useState('');
+  const [role, setRole] = useState('user');
 
   useEffect(() => {
     M.AutoInit();
@@ -37,6 +36,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
     setGender('');
     setPhoneNumber('');
     setBirthdate('');
+    setRole('user');
     setError('');
   };
 
@@ -98,11 +98,20 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
       return;
     }
 
+    if (role === "admin") {
+      
+      const numAdmins = await obtenerNumeroDeAdmins();
+      console.log(numAdmins);
+      if (numAdmins >= 2) {
+        setError("Ya hay dos administradores registrados. No se pueden registrar más.");
+        return;
+      }
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formattedEmail, formattedPassword);
       const user = userCredential.user;
 
-      // Crear el objeto de datos del usuario
       const userData = {
         nombres: firstName,
         apellidos: lastName,
@@ -111,15 +120,15 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
         genero: gender,
         correo: formattedEmail,
         telefono: phoneNumber,
-        rol: "user",
+        rol: role,
         fechaNacimiento: birthdate,
-        fotoURL: "", // Puedes agregar un campo para la URL de la foto si es necesario
+        fotoURL: "",
       };
 
-      // Guardar en Firestore usando la función crearUsuario de firestoreService
+      
       await crearUsuario(user.uid, userData);
 
-      console.log("Registro exitoso:", user); // Debug
+      console.log("Registro exitoso:", user); 
       onLogin(user);
       resetFields();
       onClose();
@@ -219,6 +228,18 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
                   required
                 />
                 <label>Fecha de Nacimiento</label>
+              </div>
+
+              <div className="input-field">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  required
+                >
+                  <option value="user">Usuario</option>
+                  <option value="admin">Administrador</option>
+                </select>
+                <label>Rol</label>
               </div>
             </>
           )}

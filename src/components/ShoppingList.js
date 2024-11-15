@@ -43,7 +43,7 @@ const ShoppingList = ({ products, onAddProduct, onEditProduct, onDeleteProduct, 
                 <td>
                   <input
                     type="checkbox"
-                    checked={product.comprado || false}  // Asegura que el checkbox refleje el estado correcto
+                    checked={product.comprado || false}  
                     onChange={() => onToggleComplete(product.id, !product.comprado)}
                   />
                 </td>
@@ -67,7 +67,6 @@ const ShoppingList = ({ products, onAddProduct, onEditProduct, onDeleteProduct, 
         </tbody>
       </table>
 
-      {/* Modal para agregar producto */}
       {isAddModalOpen && (
         <AddProductModal
           isOpen={isAddModalOpen}
@@ -76,7 +75,6 @@ const ShoppingList = ({ products, onAddProduct, onEditProduct, onDeleteProduct, 
         />
       )}
 
-      {/* Modal para editar producto */}
       {isEditModalOpen && selectedProduct && (
         <EditProductModal
           product={selectedProduct}
